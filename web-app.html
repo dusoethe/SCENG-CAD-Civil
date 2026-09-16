@@ -38,7 +38,9 @@
       }
       @keyframes ocs-spin { to { transform: rotate(360deg); } }
     </style>
-    <link data-trunk rel="rust" data-bin="OpenCADStudio" />
+    <!-- Binaryen v123 cannot validate the bulk-memory instructions emitted by
+         current Rust. Keep the release build functional until the optimizer is pinned. -->
+    <link data-trunk rel="rust" data-bin="OpenCADStudio" data-wasm-opt="0" />
     <link data-trunk rel="copy-dir" href="web/fonts" />
     <link data-trunk rel="copy-file" href="web/ocs-parse-worker.js" />
     <link data-trunk rel="copy-file" href="web/discussions.json" />
