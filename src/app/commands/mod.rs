@@ -323,6 +323,7 @@ pub fn start_allowed(cmd: &str) -> bool {
             // command that opens the same dialog belongs here too.
             | "OPTIONS"
             | "OP"
+            | "SURVEY"
     )
 }
 
@@ -351,6 +352,7 @@ inventory::submit!(crate::command::CommandRegistration {
         "SNAP",
         "OPTIONS",
         "OP",
+        "SURVEY",
         "SYNCPVIEWPORTS",
         "VPSYNC",
         // Viewport-arrangement shortcuts (delegate to VPORTS configurations).

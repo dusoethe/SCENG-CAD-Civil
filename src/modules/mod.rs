@@ -31,6 +31,7 @@ pub mod parametric;
 pub mod model;
 pub mod layout;
 pub mod manage;
+pub mod survey;
 pub mod view;
 
 // ── Core module registry ─────────────────────────────────────────────────

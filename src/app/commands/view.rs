@@ -313,6 +313,11 @@ impl OpenCADStudio {
                 return Some(Task::done(Message::OptionsOpen));
             }
 
+            // ── Native Survey workspace ──────────────────────────────────
+            "SURVEY" => {
+                return Some(Task::done(Message::SurveyOpen));
+            }
+
             "PARAMETERS" => {
                 return Some(Task::done(Message::NamedParametersOpen));
             }

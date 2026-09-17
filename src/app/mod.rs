@@ -1791,6 +1791,7 @@ pub enum ModalKind {
     Recovery,
     RecoveryPrompt,
     Options,
+    Survey,
     FindReplace,
     AecDropWarning,
     #[cfg(not(target_arch = "wasm32"))]
@@ -2057,6 +2058,8 @@ pub enum Message {
     SaveDialogPathPicked(Option<std::path::PathBuf>),
     /// Open the application-wide Options dialog.
     OptionsOpen,
+    /// Open the native Survey workspace overview.
+    SurveyOpen,
     /// Switch the visible page in Options.
     OptionsTabChanged(crate::ui::window::options::OptionsTab),
     /// Set CURSORSIZE from the Display-page slider.

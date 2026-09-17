@@ -15,6 +15,7 @@ impl OpenCADStudio {
             Some(K::Aliases) => crate::tr!("modal", "command-aliases"),
             Some(K::NamedParameters) => crate::t!("Named Parameters").into_owned(),
             Some(K::Options) => crate::tr!("action", "options"),
+            Some(K::Survey) => "SCENG CAD Civil Survey".to_string(),
             Some(K::FindReplace) => crate::tr!("modal", "find-replace"),
             Some(K::PluginManager) => crate::tr!("modal", "plugin-manager"),
             Some(K::UpdateNotice) => crate::tr!("modal", "update-available"),
@@ -355,6 +356,9 @@ impl OpenCADStudio {
                     )
                 },
             ),
+            super::super::ModalKind::Survey => sized_flow(ex, 820, 500, |flow| {
+                crate::ui::window::survey::view_window(flow)
+            }),
             super::super::ModalKind::DraftingSettings => {
                 let state = self.drafting_settings_state.as_ref();
                 let dirty = self.drafting_settings_dirty();

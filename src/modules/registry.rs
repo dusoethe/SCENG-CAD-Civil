@@ -20,6 +20,9 @@ pub fn all_modules() -> Vec<Box<dyn CadModule>> {
         Box::new(super::annotate::AnnotateModule),
         Box::new(super::view::ViewModule),
         Box::new(super::manage::ManageModule),
+        // Civil workspaces follow the existing CAD-management ribbon tabs.
+        // Additional native modules (Terrain, Road Design, etc.) belong here.
+        Box::new(super::survey::SurveyModule),
         Box::new(super::layout::LayoutModule),
     ]
 }

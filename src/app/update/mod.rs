@@ -6801,6 +6801,11 @@ impl OpenCADStudio {
                 Task::none()
             }
 
+            Message::SurveyOpen => {
+                self.active_modal = Some(super::ModalKind::Survey);
+                Task::none()
+            }
+
             Message::OptionsTabChanged(tab) => {
                 self.options_tab = tab;
                 Task::none()
