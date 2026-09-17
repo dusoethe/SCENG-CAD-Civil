@@ -477,7 +477,7 @@ fn registry_error_message(error: &str) -> (Cow<'static, str>, Cow<'static, str>)
         (
             t!("Unable to verify the server certificate"),
             t!(
-                "Open CAD Studio could not trust the certificate presented for the plugin registry. Check your system certificate and proxy settings, then retry."
+                "SCENG CAD Civil could not trust the certificate presented for the plugin registry. Check your system certificate and proxy settings, then retry."
             ),
         )
     } else if error.contains("timed out") || error.contains("timeout") {
@@ -957,7 +957,7 @@ pub fn view_web_notice<'a>() -> Element<'a, Message> {
                 .width(Length::Fit)
                 .align_x(iced::alignment::Horizontal::Center),
             text(t!(
-                "Open CAD Studio plugins are native packages and cannot run inside a browser. Download the desktop app to browse, install, and use plugins."
+                "SCENG CAD Civil plugins are native packages and cannot run inside a browser. Download the desktop app to browse, install, and use plugins."
             ))
             .size(13)
             .width(Length::Fit)

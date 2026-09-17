@@ -344,7 +344,7 @@ pub struct UserSettings {
     // Ortho ($ORTHOMODE) and the running OSNAP set ($OSMODE) are per-drawing —
     // stored in the document header, not here (they used to be persisted app-
     // globally, which duplicated the file's own state).
-    /// Whether the one-time "make Open CAD Studio the default for .dwg/.dxf?"
+    /// Whether the one-time "make SCENG CAD Civil the default for .dwg/.dxf?"
     /// prompt has already been shown. Set once the user answers (either way),
     /// so we never nag again on subsequent launches.
     pub default_assoc_prompted: bool,

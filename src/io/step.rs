@@ -239,7 +239,7 @@ pub fn build_step(meshes: &[&MeshModel]) -> Option<String> {
     let file = format!(
         "ISO-10303-21;\n\
          HEADER;\n\
-         FILE_DESCRIPTION(('Open CAD Studio STEP export'),'2;1');\n\
+         FILE_DESCRIPTION(('SCENG CAD Civil STEP export'),'2;1');\n\
          FILE_NAME('{ts}','','',(''),'',' ',' ');\n\
          FILE_SCHEMA(('CONFIG_CONTROL_DESIGN'));\n\
          ENDSEC;\n\

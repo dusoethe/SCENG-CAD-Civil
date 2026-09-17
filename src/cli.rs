@@ -16,7 +16,7 @@ use std::sync::OnceLock;
 
 use clap::Parser;
 
-/// Open CAD Studio command-line options.
+/// SCENG CAD Civil command-line options.
 #[derive(Parser, Debug, Default)]
 #[command(
     name = "OpenCADStudio",
@@ -28,7 +28,7 @@ use clap::Parser;
         "\nprofile: ", env!("OCS_BUILD_PROFILE"),
         "\nfeatures: ", env!("OCS_BUILD_FEATURES"),
     ),
-    about = crate::t!("Open CAD Studio — 2D/3D CAD editor").into_owned(),
+    about = crate::t!("SCENG CAD Civil — 2D/3D CAD editor").into_owned(),
     long_about = None,
 )]
 pub struct Cli {

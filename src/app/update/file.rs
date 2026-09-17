@@ -2271,7 +2271,7 @@ impl OpenCADStudio {
                     .map(|name| name.to_string_lossy().into_owned())
                     .unwrap_or_else(|| outcome.path.display().to_string());
                 self.command_line.push_error_once(
-                    crate::tf!("Save stopped: \"{file_name}\" changed outside Open CAD Studio.")
+                    crate::tf!("Save stopped: \"{file_name}\" changed outside SCENG CAD Civil.")
                         .as_ref(),
                 );
                 self.pending_external_change = Some(crate::app::PendingExternalChange {

@@ -1038,7 +1038,7 @@ fn response(id: Value, result: Value) -> Value {
 }
 
 fn server_info() -> Value {
-    json!({"name":"OpenCADStudio","title":"Open CAD Studio","version":env!("OCS_APP_VERSION")})
+    json!({"name":"OpenCADStudio","title":"SCENG CAD Civil","version":env!("OCS_APP_VERSION")})
 }
 
 fn modern_request(params: &Value) -> bool {

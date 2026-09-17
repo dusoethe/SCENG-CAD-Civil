@@ -1,4 +1,4 @@
-//! "Make Open CAD Studio the default for .dwg / .dxf" — the platform-specific
+//! "Make SCENG CAD Civil the default for .dwg / .dxf" — the platform-specific
 //! plumbing behind the one-time first-launch prompt (see `app::update`'s
 //! `AssocPrompt*` handlers).
 //!
@@ -10,7 +10,7 @@
 //!     per-app default-programs dialog via
 //!     `IApplicationAssociationRegistrationUI::LaunchAdvancedAssociationUI`,
 //!     passing the RegisteredApplications name the MSI registered
-//!     ("Open CAD Studio"). The user confirms there.
+//!     ("SCENG CAD Civil"). The user confirms there.
 //!   * Linux — `xdg-mime default` writes the association into the user's
 //!     `mimeapps.list`; no separate consent step. The .desktop file already
 //!     declares the matching `MimeType=` entries.
@@ -186,7 +186,7 @@ mod windows_impl {
     }
 
     // Must match the RegisteredApplications value name in packaging/windows/main.wxs.
-    const APP_REGISTRY_NAME: &str = "Open CAD Studio";
+    const APP_REGISTRY_NAME: &str = "SCENG CAD Civil";
 
     pub(super) fn set_default() -> Result<String, String> {
         unsafe {
@@ -248,7 +248,7 @@ mod windows_impl {
             r"Software\Classes\OpenCADStudio.DWG",
             r"Software\Classes\OpenCADStudio.DXF",
             r"Software\Classes\OpenCADStudio.BAK",
-            r"Software\Open CAD Studio",
+            r"Software\SCENG CAD Civil",
         ] {
             let w = wide(key);
             unsafe {
@@ -362,7 +362,7 @@ mod windows_impl {
     ///   * an `Applications\OpenCADStudio.exe` entry → listed under "Open with";
     ///   * ProgIDs + a Capabilities / RegisteredApplications block → the app is
     ///     a default-app candidate, so the in-app "set as default" prompt's OS
-    ///     dialog (LaunchAdvancedAssociationUI "Open CAD Studio") finds it.
+    ///     dialog (LaunchAdvancedAssociationUI "SCENG CAD Civil") finds it.
     pub(super) fn register_handler() -> Result<(), String> {
         let exe = std::env::current_exe().map_err(|e| e.to_string())?;
         let exe = exe.to_string_lossy().to_string();
@@ -374,7 +374,7 @@ mod windows_impl {
             None,
             &format!("\"{exe}\" \"%1\""),
         )?;
-        set_string(APP_BASE, Some("FriendlyAppName"), "Open CAD Studio")?;
+        set_string(APP_BASE, Some("FriendlyAppName"), "SCENG CAD Civil")?;
         // DefaultIcon is what Windows uses to show the app icon in the
         // "Open with" context-menu list and the "Choose another app" picker.
         set_string(&format!(r"{APP_BASE}\DefaultIcon"), None, &format!("\"{exe}\",0"))?;
@@ -412,9 +412,9 @@ mod windows_impl {
         // Mirrors the MSI's DefaultPrograms component, but per-user, so the
         // portable build is a Default-Apps candidate too. The value name in
         // RegisteredApplications must equal the name passed to
-        // LaunchAdvancedAssociationUI ("Open CAD Studio").
-        const CAP: &str = r"Software\Open CAD Studio\Capabilities";
-        set_string(CAP, Some("ApplicationName"), "Open CAD Studio")?;
+        // LaunchAdvancedAssociationUI ("SCENG CAD Civil").
+        const CAP: &str = r"Software\SCENG CAD Civil\Capabilities";
+        set_string(CAP, Some("ApplicationName"), "SCENG CAD Civil")?;
         set_string(
             CAP,
             Some("ApplicationDescription"),
@@ -425,8 +425,8 @@ mod windows_impl {
         set_string(&format!(r"{CAP}\FileAssociations"), Some(".bak"), "OpenCADStudio.BAK")?;
         set_string(
             r"Software\RegisteredApplications",
-            Some("Open CAD Studio"),
-            r"Software\Open CAD Studio\Capabilities",
+            Some("SCENG CAD Civil"),
+            r"Software\SCENG CAD Civil\Capabilities",
         )?;
         Ok(())
     }
@@ -502,7 +502,7 @@ mod linux_impl {
 
         let contents = format!(
             "[Desktop Entry]\n\
-             Name=Open CAD Studio\n\
+             Name=SCENG CAD Civil\n\
              Comment=A CAD application for 2D/3D drawing and design\n\
              Exec={exec} %F\n\
              Icon={APP_ID}\n\
@@ -688,7 +688,7 @@ mod linux_impl {
             .status()
             .map_err(|e| format!("could not run xdg-mime: {e}"))?;
         if status.success() {
-            Ok("Open CAD Studio is now the default for .dwg and .dxf files.".to_string())
+            Ok("SCENG CAD Civil is now the default for .dwg and .dxf files.".to_string())
         } else {
             Err(format!("xdg-mime exited with {status}"))
         }
@@ -770,7 +770,7 @@ mod macos_impl {
         }
         unsafe { CFRelease(bundle as *const c_void) };
         match last_err {
-            None => Ok("Open CAD Studio is now the default for .dwg and .dxf files.".to_string()),
+            None => Ok("SCENG CAD Civil is now the default for .dwg and .dxf files.".to_string()),
             Some(e) => Err(e),
         }
     }
