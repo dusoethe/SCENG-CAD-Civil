@@ -2,6 +2,7 @@
 #![recursion_limit = "256"]
 
 pub mod app;
+pub mod civil;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod cli;
 pub mod command;

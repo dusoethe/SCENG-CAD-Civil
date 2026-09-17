@@ -218,8 +218,7 @@ pub struct UiThemePalette {
 
 impl Default for UiThemePalette {
     fn default() -> Self {
-        sceng_theme_palette_for_surface(SCENG_THEME_RED, SCENG_SURFACE_LIGHT)
-            .expect("SCENG red light theme must exist")
+        sceng_theme_palette(SCENG_THEME_RED).expect("SCENG red light theme must exist")
     }
 }
 
