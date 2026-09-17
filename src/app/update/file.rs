@@ -868,7 +868,11 @@ impl OpenCADStudio {
     /// Distribute a loaded config into live app state (called once at startup).
     pub(in crate::app) fn apply_config(&mut self, cfg: crate::app::config::AppConfig) {
         self.apply_settings(&cfg.settings);
-        self.ui_theme = cfg.theme.clone();
+        self.ui_theme = if crate::app::config::is_legacy_default_theme(&cfg.theme.name) {
+            crate::app::config::UiThemeConfig::default()
+        } else {
+            cfg.theme.clone()
+        };
         self.active_theme = self.ui_theme.to_iced();
         self.theme_color_inputs = self.ui_theme.palette.hex_values();
         self.model_space = cfg.model_space;

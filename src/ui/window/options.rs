@@ -1,5 +1,5 @@
 pub(crate) mod spacemouse;
-use crate::app::config::UiThemeConfig;
+use crate::app::config::{UiThemeConfig, SCENG_THEME_PRESETS};
 use crate::app::settings::CursorType;
 use crate::app::Message;
 use iced::widget::{
@@ -175,15 +175,13 @@ pub fn view_window<'a>(
         .copied()
         .find(|candidate| *candidate == default_save_format);
 
-    let theme_options = Theme::ALL
+    let theme_options = SCENG_THEME_PRESETS
         .iter()
-        .map(ToString::to_string)
+        .map(|value| (*value).to_string())
         .chain(std::iter::once("Custom".to_string()))
         .map(|value| Labelled {
             label: match value.as_str() {
-                "Light" => crate::t!("Light").into_owned(),
-                "Dark" => crate::t!("Dark").into_owned(),
-                "Custom" => crate::t!("Custom").into_owned(),
+                "Custom" => "Personalizado".to_string(),
                 _ => value.clone(),
             },
             value,

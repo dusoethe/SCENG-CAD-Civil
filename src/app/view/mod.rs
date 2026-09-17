@@ -3282,39 +3282,40 @@ fn start_action_shape(mut style: button::Style) -> button::Style {
 }
 
 pub(super) fn start_page_view<'a>(
-    patrons: &'a [(String, i64)],
-    videos: &'a [crate::videos::VideoEntry],
-    videos_loading: bool,
-    video_thumbs: &'a std::collections::HashMap<String, iced::widget::image::Handle>,
-    discussions: &'a [crate::discussions::DiscussionEntry],
-    discussions_loading: bool,
+    _patrons: &'a [(String, i64)],
+    _videos: &'a [crate::videos::VideoEntry],
+    _videos_loading: bool,
+    _video_thumbs: &'a std::collections::HashMap<String, iced::widget::image::Handle>,
+    _discussions: &'a [crate::discussions::DiscussionEntry],
+    _discussions_loading: bool,
     recents: &'a [std::path::PathBuf],
     thumbs: &'a std::collections::HashMap<std::path::PathBuf, Option<iced::widget::image::Handle>>,
     recent_limit: usize,
     recent_limit_input: &'a str,
-    action_width_out: std::sync::Arc<std::sync::atomic::AtomicU32>,
-    active: super::StartSection,
+    _action_width_out: std::sync::Arc<std::sync::atomic::AtomicU32>,
+    _active: super::StartSection,
 ) -> Element<'a, Message> {
-    responsive(move |size| {
-        start_page_content(
-            patrons,
-            videos,
-            videos_loading,
-            video_thumbs,
-            discussions,
-            discussions_loading,
+    responsive(move |_| -> Element<'a, Message> {
+        container(recent_files_panel(
             recents,
             thumbs,
             recent_limit,
             recent_limit_input,
-            size.width,
-            action_width_out.clone(),
-            active,
-        )
+            iced::Length::Fill,
+        ))
+        .padding(16)
+        .width(Fill)
+        .height(Fill)
+        .style(|theme: &Theme| container::Style {
+            background: Some(Background::Color(theme.palette().background.base.color)),
+            ..Default::default()
+        })
+        .into()
     })
     .into()
 }
 
+#[allow(dead_code)]
 fn start_page_content<'a>(
     patrons: &'a [(String, i64)],
     videos: &'a [crate::videos::VideoEntry],

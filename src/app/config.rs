@@ -13,6 +13,19 @@ use crate::ui::ribbon::CollapseMode;
 use crate::ui::statusbar::statusbar_config::StatusBarConfig;
 use crate::ui::window::plot::PlotDialogState;
 
+pub const SCENG_THEME_RED: &str = "Vermelho claro";
+pub const SCENG_THEME_BLUE: &str = "Azul aço";
+pub const SCENG_THEME_GREEN: &str = "Verde engenharia";
+pub const SCENG_THEME_YELLOW: &str = "Amarelo técnico";
+pub const SCENG_THEME_GRAY: &str = "Cinza claro";
+pub const SCENG_THEME_PRESETS: [&str; 5] = [
+    SCENG_THEME_RED,
+    SCENG_THEME_BLUE,
+    SCENG_THEME_GREEN,
+    SCENG_THEME_YELLOW,
+    SCENG_THEME_GRAY,
+];
+
 /// The whole persisted config, grouped into top-level sections.
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
@@ -90,17 +103,19 @@ pub struct UiThemeConfig {
 
 impl Default for UiThemeConfig {
     fn default() -> Self {
-        let theme = iced::Theme::Oxocarbon;
+        let name = SCENG_THEME_RED;
         Self {
-            name: theme.to_string(),
-            palette: UiThemePalette::from_iced(theme.seed()),
+            name: name.to_string(),
+            palette: sceng_theme_palette(name).expect("SCENG red theme must exist"),
         }
     }
 }
 
 impl UiThemeConfig {
     pub fn to_iced(&self) -> iced::Theme {
-        if self.name == "Custom" {
+        if let Some(palette) = sceng_theme_palette(&self.name) {
+            iced::Theme::custom(self.name.clone(), palette.to_iced())
+        } else if self.name == "Custom" {
             iced::Theme::custom("Custom", self.palette.to_iced())
         } else {
             builtin_theme(&self.name).unwrap_or(iced::Theme::Oxocarbon)
@@ -121,7 +136,7 @@ pub struct UiThemePalette {
 
 impl Default for UiThemePalette {
     fn default() -> Self {
-        Self::from_iced(iced::Theme::Oxocarbon.seed())
+        sceng_theme_palette(SCENG_THEME_RED).expect("SCENG red theme must exist")
     }
 }
 
@@ -174,6 +189,58 @@ impl UiThemePalette {
         }
         true
     }
+}
+
+/// The five engineering palettes exposed by SCENG CAD Civil. Each uses a
+/// light technical surface and a sufficiently dark accent for tool buttons.
+pub fn sceng_theme_palette(name: &str) -> Option<UiThemePalette> {
+    match name {
+        SCENG_THEME_RED => Some(UiThemePalette {
+            background: [250, 247, 247],
+            text: [54, 39, 42],
+            primary: [205, 80, 86],
+            success: [47, 137, 91],
+            warning: [190, 133, 24],
+            danger: [177, 48, 56],
+        }),
+        SCENG_THEME_BLUE => Some(UiThemePalette {
+            background: [245, 248, 252],
+            text: [31, 52, 71],
+            primary: [42, 116, 175],
+            success: [41, 132, 91],
+            warning: [184, 126, 22],
+            danger: [187, 63, 68],
+        }),
+        SCENG_THEME_GREEN => Some(UiThemePalette {
+            background: [245, 250, 247],
+            text: [31, 66, 50],
+            primary: [43, 136, 88],
+            success: [37, 125, 80],
+            warning: [186, 129, 23],
+            danger: [183, 61, 67],
+        }),
+        SCENG_THEME_YELLOW => Some(UiThemePalette {
+            background: [252, 250, 242],
+            text: [66, 55, 31],
+            primary: [181, 125, 20],
+            success: [51, 128, 86],
+            warning: [181, 125, 20],
+            danger: [181, 60, 64],
+        }),
+        SCENG_THEME_GRAY => Some(UiThemePalette {
+            background: [247, 248, 250],
+            text: [49, 54, 60],
+            primary: [100, 110, 120],
+            success: [48, 128, 85],
+            warning: [180, 125, 25],
+            danger: [180, 61, 67],
+        }),
+        _ => None,
+    }
+}
+
+pub fn is_legacy_default_theme(name: &str) -> bool {
+    name == "Oxocarbon"
 }
 
 pub fn builtin_theme(name: &str) -> Option<iced::Theme> {

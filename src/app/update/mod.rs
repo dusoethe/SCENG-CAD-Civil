@@ -6868,7 +6868,13 @@ impl OpenCADStudio {
                     self.saved_custom_palette = Some(self.ui_theme.palette);
                 }
                 self.ui_theme.name = name;
-                if let Some(theme) = crate::app::config::builtin_theme(&self.ui_theme.name) {
+                if let Some(palette) =
+                    crate::app::config::sceng_theme_palette(&self.ui_theme.name)
+                {
+                    self.ui_theme.palette = palette;
+                    self.theme_color_inputs = self.ui_theme.palette.hex_values();
+                    self.active_theme = self.ui_theme.to_iced();
+                } else if let Some(theme) = crate::app::config::builtin_theme(&self.ui_theme.name) {
                     self.ui_theme.palette =
                         crate::app::config::UiThemePalette::from_iced(theme.seed());
                     self.theme_color_inputs = self.ui_theme.palette.hex_values();

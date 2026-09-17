@@ -3994,7 +3994,7 @@ impl OpenCADStudio {
             })
             .ok(),
             // Color scheme (default: Oxocarbon)
-            active_theme: Theme::Oxocarbon,
+            active_theme: config::UiThemeConfig::default().to_iced(),
             ui_theme: config::UiThemeConfig::default(),
             theme_color_inputs: config::UiThemePalette::default().hex_values(),
             model_space: config::ModelSpaceThemeConfig::default(),
@@ -4396,20 +4396,10 @@ impl OpenCADStudio {
             Task::done(Message::PollWebFonts),
             Task::done(Message::ApplyWebFont(primary_font)),
         ]);
-        // Web can't reach the Patreon API directly (CORS); fetch the CI-built
-        // supporters.json served on the same origin instead.
-        let patrons = Task::perform(crate::patreon::fetch_patrons_web(), Message::PatronsFetched);
-        s.videos_loading = true;
-        let videos = Task::perform(crate::videos::fetch_playlist_web(), Message::VideosFetched);
-        s.discussions_loading = true;
-        let discussions = Task::perform(
-            crate::discussions::fetch_discussions_web(),
-            Message::DiscussionsFetched,
-        );
         let thumbs_fetch = s.refresh_recent_thumbs();
         (
             s,
-            Task::batch([focus, fonts, patrons, videos, discussions, thumbs_fetch]),
+            Task::batch([focus, fonts, thumbs_fetch]),
         )
     }
 }
