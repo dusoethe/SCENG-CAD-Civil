@@ -2075,8 +2075,12 @@ pub enum Message {
     CrosshairColorChanged(String),
     /// Set the default type/version used when first saving a new drawing.
     DefaultSaveFormatChanged(String),
-    /// Select one of Iced's built-in themes or the editable Custom theme.
+    /// Legacy single-picker selection kept for command compatibility.
     OptionsThemeChanged(String),
+    /// Select the SCENG control accent independently from the surface mode.
+    OptionsThemeAccentChanged(String),
+    /// Select Dark, Dark Light, or Light independently from the accent.
+    OptionsThemeSurfaceChanged(String),
     /// Edit one of Custom theme's six base colours as #RRGGBB.
     OptionsThemeColorChanged(usize, String),
     /// Change Model Space canvas mode (MatchTheme, ClassicDark, Custom).

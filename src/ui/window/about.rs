@@ -1,6 +1,6 @@
 use crate::app::Message;
 use crate::t;
-use iced::widget::{button, column, container, row, svg, text, Space};
+use iced::widget::{button, column, container, image, row, text, Space};
 use iced::{Background, Border, Element, Fill, Length, Shrink, Theme};
 
 fn muted_style(theme: &Theme) -> iced::widget::text::Style {
@@ -100,10 +100,10 @@ pub fn view_window(
     } else {
         Length::Fixed(148.0)
     };
-    let logo = svg(svg::Handle::from_memory(include_bytes!(
-        "../../../assets/logo.svg"
-    )))
-    .width(Length::Fixed(72.0))
+    let logo = image(image::Handle::from_bytes(
+        &include_bytes!("../../../assets/sceng-tools.png")[..],
+    ))
+    .width(Length::Fixed(168.0))
     .height(Length::Fixed(72.0));
 
     let hero = container(

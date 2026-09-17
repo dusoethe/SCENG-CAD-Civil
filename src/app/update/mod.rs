@@ -6474,6 +6474,7 @@ impl OpenCADStudio {
                     self.saved_custom_palette = Some(self.ui_theme.palette);
                 }
                 self.ui_theme.name = theme.to_string();
+                self.ui_theme.clear_sceng_theme();
                 self.ui_theme.palette = crate::app::config::UiThemePalette::from_iced(theme.seed());
                 self.theme_color_inputs = self.ui_theme.palette.hex_values();
                 self.active_theme = theme;
@@ -6867,14 +6868,13 @@ impl OpenCADStudio {
                 if self.ui_theme.name == "Custom" && name != "Custom" {
                     self.saved_custom_palette = Some(self.ui_theme.palette);
                 }
-                self.ui_theme.name = name;
-                if let Some(palette) =
-                    crate::app::config::sceng_theme_palette(&self.ui_theme.name)
-                {
-                    self.ui_theme.palette = palette;
+                let surface = self.ui_theme.sceng_surface().to_string();
+                if self.ui_theme.set_sceng_theme(&name, &surface) {
                     self.theme_color_inputs = self.ui_theme.palette.hex_values();
                     self.active_theme = self.ui_theme.to_iced();
-                } else if let Some(theme) = crate::app::config::builtin_theme(&self.ui_theme.name) {
+                } else if let Some(theme) = crate::app::config::builtin_theme(&name) {
+                    self.ui_theme.name = name;
+                    self.ui_theme.clear_sceng_theme();
                     self.ui_theme.palette =
                         crate::app::config::UiThemePalette::from_iced(theme.seed());
                     self.theme_color_inputs = self.ui_theme.palette.hex_values();
@@ -6892,6 +6892,43 @@ impl OpenCADStudio {
                 Task::none()
             }
 
+            Message::OptionsThemeAccentChanged(accent) => {
+                if accent == "Custom" {
+                    if self.ui_theme.name != "Custom" {
+                        self.saved_custom_palette = Some(self.ui_theme.palette);
+                    }
+                    self.ui_theme.name = "Custom".to_string();
+                    self.ui_theme.clear_sceng_theme();
+                    if let Some(saved) = self.saved_custom_palette {
+                        self.ui_theme.palette = saved;
+                        self.theme_color_inputs = saved.hex_values();
+                    }
+                } else {
+                    let surface = self.ui_theme.sceng_surface().to_string();
+                    self.ui_theme.set_sceng_theme(&accent, &surface);
+                    self.theme_color_inputs = self.ui_theme.palette.hex_values();
+                }
+                self.active_theme = self.ui_theme.to_iced();
+                self.sync_model_space_theme(true);
+                self.persist_settings_if_changed();
+                Task::none()
+            }
+
+            Message::OptionsThemeSurfaceChanged(surface) => {
+                let accent = self
+                    .ui_theme
+                    .sceng_accent()
+                    .unwrap_or(crate::app::config::SCENG_THEME_RED)
+                    .to_string();
+                if self.ui_theme.set_sceng_theme(&accent, &surface) {
+                    self.theme_color_inputs = self.ui_theme.palette.hex_values();
+                    self.active_theme = self.ui_theme.to_iced();
+                    self.sync_model_space_theme(true);
+                    self.persist_settings_if_changed();
+                }
+                Task::none()
+            }
+
             Message::OptionsThemeColorChanged(index, value) => {
                 if index >= self.theme_color_inputs.len() {
                     return Task::none();
@@ -6899,6 +6936,7 @@ impl OpenCADStudio {
                 self.theme_color_inputs[index] = value.clone();
                 if self.ui_theme.palette.set_hex(index, &value) {
                     self.ui_theme.name = "Custom".to_string();
+                    self.ui_theme.clear_sceng_theme();
                     self.active_theme = self.ui_theme.to_iced();
                     self.sync_model_space_theme(true);
                     self.persist_settings_if_changed();

@@ -1,5 +1,7 @@
 pub(crate) mod spacemouse;
-use crate::app::config::{UiThemeConfig, SCENG_THEME_PRESETS};
+use crate::app::config::{
+    UiThemeConfig, SCENG_SURFACE_PRESETS, SCENG_THEME_CAD, SCENG_THEME_PRESETS,
+};
 use crate::app::settings::CursorType;
 use crate::app::Message;
 use iced::widget::{
@@ -189,8 +191,31 @@ pub fn view_window<'a>(
         .collect::<Vec<_>>();
     let selected_theme = theme_options
         .iter()
-        .find(|choice| choice.value == ui_theme.name)
+        .find(|choice| choice.value == ui_theme.sceng_accent().unwrap_or("Custom"))
         .cloned();
+    let surface_options = SCENG_SURFACE_PRESETS
+        .iter()
+        .map(|value| Labelled {
+            label: (*value).to_string(),
+            value: (*value).to_string(),
+        })
+        .collect::<Vec<_>>();
+    let selected_surface = surface_options
+        .iter()
+        .find(|choice| choice.value == ui_theme.sceng_surface())
+        .cloned();
+    let surface_control: Element<'a, Message> = if ui_theme.sceng_accent() == Some(SCENG_THEME_CAD) {
+        text("Dark (fixo no Tema CAD)").size(12).into()
+    } else {
+        iced::widget::pick_list(
+            selected_surface,
+            surface_options,
+            |choice| choice.label.clone(),
+        )
+        .on_select(|choice| Message::OptionsThemeSurfaceChanged(choice.value))
+        .width(sizing.width)
+        .into()
+    };
 
     let language_options = crate::i18n::Language::ALL
         .into_iter()
@@ -275,16 +300,6 @@ pub fn view_window<'a>(
         .align_y(iced::Center),
         Space::new().height(24),
         text(crate::t!("Applications")).size(15),
-        Space::new().height(10),
-        row![
-            text(crate::t!("Installed plugins and their sources")).size(12).width(Fill),
-            button(text(crate::t!("Plugins…")).size(11))
-                .on_press(Message::PluginManagerOpen)
-                .padding([4, 10])
-                .style(button::secondary),
-        ]
-        .spacing(10)
-        .align_y(iced::Center),
         Space::new().height(10),
         row![
             text(crate::t!("Keyboard shortcuts")).size(12).width(Fill),
@@ -577,19 +592,26 @@ pub fn view_window<'a>(
         text(crate::tr!("options", "theme-section")).size(15),
         Space::new().height(10),
         row![
-            text(crate::tr!("options", "theme-label")).size(12).width(150),
+            text("Cor de destaque").size(12).width(150),
             iced::widget::pick_list(
                 selected_theme,
                 theme_options,
                 |choice| choice.label.clone(),
             )
-            .on_select(|choice| Message::OptionsThemeChanged(choice.value))
+            .on_select(|choice| Message::OptionsThemeAccentChanged(choice.value))
             .width(sizing.width),
         ]
         .spacing(12)
         .align_y(iced::Center),
         Space::new().height(8),
-        text(crate::tr!("options", "theme-help"))
+        row![
+            text("Modo de fundo").size(12).width(150),
+            surface_control,
+        ]
+        .spacing(12)
+        .align_y(iced::Center),
+        Space::new().height(8),
+        text("A cor aparece nos botões e controles. Escolha Dark, Dark Light ou Light para o fundo de trabalho.")
         .size(11)
         .width(sizing.width),
         Space::new().height(12),

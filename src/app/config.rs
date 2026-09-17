@@ -18,12 +18,26 @@ pub const SCENG_THEME_BLUE: &str = "Azul aço";
 pub const SCENG_THEME_GREEN: &str = "Verde engenharia";
 pub const SCENG_THEME_YELLOW: &str = "Amarelo técnico";
 pub const SCENG_THEME_GRAY: &str = "Cinza claro";
-pub const SCENG_THEME_PRESETS: [&str; 5] = [
+pub const SCENG_THEME_CAD: &str = "Tema CAD";
+pub const SCENG_THEME_PRESETS: [&str; 6] = [
     SCENG_THEME_RED,
     SCENG_THEME_BLUE,
     SCENG_THEME_GREEN,
     SCENG_THEME_YELLOW,
     SCENG_THEME_GRAY,
+    SCENG_THEME_CAD,
+];
+
+/// Surface brightness is intentionally independent from the control accent.
+/// This lets a civil designer keep familiar red, blue, green, yellow, gray,
+/// or CAD controls while choosing the most comfortable working environment.
+pub const SCENG_SURFACE_DARK: &str = "Dark";
+pub const SCENG_SURFACE_DARK_LIGHT: &str = "Dark Light";
+pub const SCENG_SURFACE_LIGHT: &str = "Light";
+pub const SCENG_SURFACE_PRESETS: [&str; 3] = [
+    SCENG_SURFACE_DARK,
+    SCENG_SURFACE_DARK_LIGHT,
+    SCENG_SURFACE_LIGHT,
 ];
 
 /// The whole persisted config, grouped into top-level sections.
@@ -99,24 +113,92 @@ pub enum DockSide {
 pub struct UiThemeConfig {
     pub name: String,
     pub palette: UiThemePalette,
+    /// SCENG control accent. Empty keeps compatibility with previous built-in
+    /// and custom themes saved before the two-axis theme picker existed.
+    #[serde(default)]
+    pub accent: String,
+    /// Background luminosity for a SCENG theme.
+    #[serde(default)]
+    pub surface: String,
 }
 
 impl Default for UiThemeConfig {
     fn default() -> Self {
-        let name = SCENG_THEME_RED;
+        let accent = SCENG_THEME_RED;
+        let surface = SCENG_SURFACE_LIGHT;
         Self {
-            name: name.to_string(),
-            palette: sceng_theme_palette(name).expect("SCENG red theme must exist"),
+            name: sceng_theme_display_name(accent, surface),
+            palette: sceng_theme_palette_for_surface(accent, surface)
+                .expect("SCENG red light theme must exist"),
+            accent: accent.to_string(),
+            surface: surface.to_string(),
         }
     }
 }
 
 impl UiThemeConfig {
+    /// Return the active SCENG accent. Older saved SCENG configurations stored
+    /// just the accent in `name`, so they continue to load as Light themes.
+    pub fn sceng_accent(&self) -> Option<&str> {
+        if self.name == "Custom" {
+            return None;
+        }
+        if SCENG_THEME_PRESETS.contains(&self.accent.as_str()) {
+            Some(self.accent.as_str())
+        } else if SCENG_THEME_PRESETS.contains(&self.name.as_str()) {
+            Some(self.name.as_str())
+        } else {
+            None
+        }
+    }
+
+    /// Empty or unknown saved values resolve safely to the normal Light mode.
+    pub fn sceng_surface(&self) -> &str {
+        if self.sceng_accent() == Some(SCENG_THEME_CAD) {
+            SCENG_SURFACE_DARK
+        } else if SCENG_SURFACE_PRESETS.contains(&self.surface.as_str()) {
+            self.surface.as_str()
+        } else {
+            SCENG_SURFACE_LIGHT
+        }
+    }
+
+    pub fn set_sceng_theme(&mut self, accent: &str, surface: &str) -> bool {
+        // Tema CAD is deliberately a complete dark workbench. Its menus,
+        // dialogs, ribbon, and model space must be dark together, rather than
+        // looking like a light application around a dark canvas.
+        let surface = if accent == SCENG_THEME_CAD {
+            SCENG_SURFACE_DARK
+        } else {
+            surface
+        };
+        let Some(palette) = sceng_theme_palette_for_surface(accent, surface) else {
+            return false;
+        };
+        self.name = sceng_theme_display_name(accent, surface);
+        self.palette = palette;
+        self.accent = accent.to_string();
+        self.surface = surface.to_string();
+        true
+    }
+
+    /// Use this before assigning one of Iced's legacy themes or a free-form
+    /// custom palette, otherwise a previously selected SCENG accent would win.
+    pub fn clear_sceng_theme(&mut self) {
+        self.accent.clear();
+        self.surface.clear();
+    }
+
     pub fn to_iced(&self) -> iced::Theme {
-        if let Some(palette) = sceng_theme_palette(&self.name) {
-            iced::Theme::custom(self.name.clone(), palette.to_iced())
-        } else if self.name == "Custom" {
+        if self.name == "Custom" {
             iced::Theme::custom("Custom", self.palette.to_iced())
+        } else if let Some(accent) = self.sceng_accent() {
+            let surface = self.sceng_surface();
+            if let Some(palette) = sceng_theme_palette_for_surface(accent, surface) {
+                iced::Theme::custom(sceng_theme_display_name(accent, surface), palette.to_iced())
+            } else {
+                builtin_theme(&self.name).unwrap_or(iced::Theme::Oxocarbon)
+            }
         } else {
             builtin_theme(&self.name).unwrap_or(iced::Theme::Oxocarbon)
         }
@@ -136,7 +218,8 @@ pub struct UiThemePalette {
 
 impl Default for UiThemePalette {
     fn default() -> Self {
-        sceng_theme_palette(SCENG_THEME_RED).expect("SCENG red theme must exist")
+        sceng_theme_palette_for_surface(SCENG_THEME_RED, SCENG_SURFACE_LIGHT)
+            .expect("SCENG red light theme must exist")
     }
 }
 
@@ -191,52 +274,45 @@ impl UiThemePalette {
     }
 }
 
-/// The five engineering palettes exposed by SCENG CAD Civil. Each uses a
-/// light technical surface and a sufficiently dark accent for tool buttons.
+/// Compatibility palette for pre-luminosity SCENG configurations.
 pub fn sceng_theme_palette(name: &str) -> Option<UiThemePalette> {
-    match name {
-        SCENG_THEME_RED => Some(UiThemePalette {
-            background: [250, 247, 247],
-            text: [54, 39, 42],
-            primary: [205, 80, 86],
-            success: [47, 137, 91],
-            warning: [190, 133, 24],
-            danger: [177, 48, 56],
-        }),
-        SCENG_THEME_BLUE => Some(UiThemePalette {
-            background: [245, 248, 252],
-            text: [31, 52, 71],
-            primary: [42, 116, 175],
-            success: [41, 132, 91],
-            warning: [184, 126, 22],
-            danger: [187, 63, 68],
-        }),
-        SCENG_THEME_GREEN => Some(UiThemePalette {
-            background: [245, 250, 247],
-            text: [31, 66, 50],
-            primary: [43, 136, 88],
-            success: [37, 125, 80],
-            warning: [186, 129, 23],
-            danger: [183, 61, 67],
-        }),
-        SCENG_THEME_YELLOW => Some(UiThemePalette {
-            background: [252, 250, 242],
-            text: [66, 55, 31],
-            primary: [181, 125, 20],
-            success: [51, 128, 86],
-            warning: [181, 125, 20],
-            danger: [181, 60, 64],
-        }),
-        SCENG_THEME_GRAY => Some(UiThemePalette {
-            background: [247, 248, 250],
-            text: [49, 54, 60],
-            primary: [100, 110, 120],
-            success: [48, 128, 85],
-            warning: [180, 125, 25],
-            danger: [180, 61, 67],
-        }),
-        _ => None,
-    }
+    sceng_theme_palette_for_surface(name, SCENG_SURFACE_LIGHT)
+}
+
+/// SCENG CAD Civil palettes: a sparse engineering accent over an independent
+/// Light, Dark Light, or Dark work surface. Tema CAD is an original technical
+/// interpretation of the familiar CAD workbench convention, not a copy of
+/// another product's interface.
+pub fn sceng_theme_palette_for_surface(accent: &str, surface: &str) -> Option<UiThemePalette> {
+    let (primary, success, warning, danger) = match accent {
+        SCENG_THEME_RED => ([205, 80, 86], [47, 137, 91], [190, 133, 24], [177, 48, 56]),
+        SCENG_THEME_BLUE => ([42, 116, 175], [41, 132, 91], [184, 126, 22], [187, 63, 68]),
+        SCENG_THEME_GREEN => ([43, 136, 88], [37, 125, 80], [186, 129, 23], [183, 61, 67]),
+        SCENG_THEME_YELLOW => ([181, 125, 20], [51, 128, 86], [181, 125, 20], [181, 60, 64]),
+        SCENG_THEME_GRAY => ([100, 110, 120], [48, 128, 85], [180, 125, 25], [180, 61, 67]),
+        // Blue-gray panels and a measured blue accent are familiar to CAD
+        // users while keeping the SCENG product identity distinct.
+        SCENG_THEME_CAD => ([48, 132, 193], [56, 151, 105], [204, 151, 37], [199, 72, 78]),
+        _ => return None,
+    };
+    let (background, text) = match surface {
+        SCENG_SURFACE_DARK => ([29, 33, 39], [235, 239, 244]),
+        SCENG_SURFACE_DARK_LIGHT => ([57, 63, 71], [244, 247, 250]),
+        SCENG_SURFACE_LIGHT => ([248, 249, 250], [43, 49, 56]),
+        _ => return None,
+    };
+    Some(UiThemePalette {
+        background,
+        text,
+        primary,
+        success,
+        warning,
+        danger,
+    })
+}
+
+pub fn sceng_theme_display_name(accent: &str, surface: &str) -> String {
+    format!("{accent} — {surface}")
 }
 
 pub fn is_legacy_default_theme(name: &str) -> bool {

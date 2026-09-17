@@ -497,6 +497,7 @@ impl OpenCADStudio {
                     }
                     let name = format!("{:?}", t);
                     self.ui_theme.name = t.to_string();
+                    self.ui_theme.clear_sceng_theme();
                     self.ui_theme.palette =
                         crate::app::config::UiThemePalette::from_iced(t.seed());
                     self.theme_color_inputs = self.ui_theme.palette.hex_values();
